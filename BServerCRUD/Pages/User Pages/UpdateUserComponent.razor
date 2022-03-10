@@ -1,0 +1,31 @@
+﻿@inject UserService userService
+
+
+<h3>Update User</h3>
+
+<div class="form-floating mb-3">
+    <input type="text" class="form-control" id="firstname" placeholder="First name" @bind="dto.Firstname">
+    <label for="firstname">First name</label>
+</div>
+
+<div class="form-floating mb-3">
+    <input type="text" class="form-control" id="lastname" placeholder="Last name" @bind="dto.Lastname">
+    <label for="lastname">Last name</label>
+</div>
+
+<button type="button" class="btn btn-primary" @onclick="UpdateUser">Update Info</button>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance modalInstance { get; set; }
+    [Parameter] public UserDTO dto { get; set; }
+
+    private async Task UpdateUser()
+    {
+        var result = await userService.UpdateUser(dto);
+        if (result > 0)
+        {
+            await modalInstance.Close(ModalResult.Ok<string>("Success"));
+        }
+    }
+
+}

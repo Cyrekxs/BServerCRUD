@@ -1,0 +1,25 @@
+﻿@inject UserService userService;
+
+<h3>Delete User</h3>
+<p>Are you sure you want to delete the selected user?</p>
+<button type="button" class="btn btn-primary" @onclick="DeleteUser">Yes</button>
+<button type="button" class="btn btn-secondary" @onclick="CancelDelete">No</button>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance modalInstance { get; set; }
+    [Parameter] public int UserID { get; set; }
+
+    private async Task DeleteUser()
+    {
+        var result = await userService.DeleteUser(UserID);
+        if (result > 0)
+        {
+            await modalInstance.Close(ModalResult.Ok<string>("Success"));
+        }
+    }
+
+    private async void CancelDelete()
+    {
+        await modalInstance.Cancel();
+    }
+}

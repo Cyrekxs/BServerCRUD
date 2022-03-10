@@ -1,0 +1,104 @@
+﻿@page "/User Lists"
+@inject UserService service
+@inject IToastService toastService
+
+@if (Users == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="container-fluid">
+        <h3>List of Users</h3>
+        <button type="button" class="btn btn-primary" @onclick="ShowEntryDialog">Add New</button>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Last name</th>
+                    <th>First name</th>
+                    <th>Username</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Users)
+                {
+                    <tr>
+                        <td>@user.Lastname</td>
+                        <td>@user.Firstname</td>
+                        <td>@user.Username</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-warning" @onclick="()=> ShowUpdateDialog(user)">Update</button>
+                                <button type="button" class="btn btn-danger" @onclick="()=> ShowDeleteDialog(user.UserID)">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+
+
+
+@code {
+
+    [CascadingParameter] public IModalService modal { get; set; }
+
+
+    public List<UserModel> Users { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        Users = await service.GetUsers();
+    }
+
+    private async Task ShowEntryDialog()
+    {
+        var modalUserEntry = modal.Show<UserEntryComponent>("User Entry");
+        var modalResult = await modalUserEntry.Result;
+
+        if (modalResult.Cancelled != true)
+        {
+            toastService.ShowInfo("New user has been successfully created!");
+            Users = await service.GetUsers();
+        }
+    }
+
+    private async Task ShowUpdateDialog(UserModel model)
+    {
+        var parameters = new ModalParameters();
+        UserDTO dto = new UserDTO()
+        {
+            UserID = model.UserID,
+            Lastname = model.Lastname,
+            Firstname = model.Firstname,
+            Username = model.Username,
+            Password = model.Password
+        };
+
+        parameters.Add("dto",dto);
+        var modalUpdate = modal.Show<UpdateUserComponent>("User Update",parameters);
+        var modalResult = await modalUpdate.Result;
+        if (modalResult.Cancelled != true)
+        {
+            toastService.ShowInfo("New user has been successfully updated!");
+            Users = await service.GetUsers();
+        }
+    }
+
+    private async Task ShowDeleteDialog(int UserID)
+    {
+        var parameters = new ModalParameters();
+        parameters.Add("UserID", UserID);
+        var modalDelete = modal.Show<DeleteUserComponent>("Delete User", parameters);
+        var modalResult = await modalDelete.Result;
+
+        if (modalResult.Cancelled!= true)
+        {
+            toastService.ShowInfo("User has been successfully deleted!");
+            Users = await service.GetUsers();
+        }
+    }
+}

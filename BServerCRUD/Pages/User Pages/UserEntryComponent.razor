@@ -1,0 +1,45 @@
+﻿@inject UserService userService
+
+<h3>User Entry</h3>
+
+<div class="form-floating mb-3">
+    <input type="text" class="form-control" id="firstname" placeholder="First name" @bind="dto.Firstname">
+    <label for="firstname">First name</label>
+</div>
+
+<div class="form-floating mb-3">
+    <input type="text" class="form-control" id="lastname" placeholder="Last name" @bind="dto.Lastname">
+    <label for="lastname">Last name</label>
+</div>
+
+
+<div class="form-floating mb-3">
+    <input type="text" class="form-control" id="floatingInput" placeholder="Username" @bind="dto.Username">
+    <label for="floatingInput">Username</label>
+</div>
+
+
+<div class="form-floating mb-3">
+    <input type="password" class="form-control" id="password" placeholder="Password" @bind="dto.Password">
+    <label for="password">Password</label>
+</div>
+
+<button type="button" class="btn btn-primary" @onclick="Save">Save</button>
+
+@code
+{
+    [CascadingParameter] private BlazoredModalInstance modalInstance { get; set; }
+
+
+    public string Message { get; set; }
+    public UserDTO dto { get; set; } = new UserDTO();
+
+    private async Task Save()
+    {
+        var result = await userService.CreateUser(dto);
+        if (result > 0)
+        {
+            await modalInstance.Close(ModalResult.Ok<string>("Success"));
+        }
+    }
+}
